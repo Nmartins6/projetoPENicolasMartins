@@ -6,9 +6,9 @@ typedef struct {
     float abdominal;
     float suprailiac;
     float thight;
-}Measurement;
+} Measurement;
 
-typedef struct{
+typedef struct {
     char name[50];
     char sex;
     int age;
@@ -17,10 +17,14 @@ typedef struct{
     float BMI;
     Measurement measurement;
 
-}Patient;
+} Patient;
 
-Patient FillPatient(Patient patient);
+Patient FillPatient(Patient *patient);
+
 Measurement FillMeasurement(Measurement *measurement);
+
 void PrintPatient(Patient patient);
+
 float CalculateBMI(float weight, float height);
+
 float MeasurementAverage();

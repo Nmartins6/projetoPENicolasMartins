@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
     Patient p1;
 
-    p1 = FillPatient(p1);
+    p1 = FillPatient(&p1);
     system("cls");
 
     PrintPatient(p1);
