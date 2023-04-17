@@ -29,7 +29,9 @@ Patient SetPatient(Patient *patient) {
 
     patient->method = SelectMethod();
 
-    patient->DC=CalculateBF(patient);
+    patient->BD = CalculateBD(patient);
+
+    patient->BF = CalculateBF(patient->BD);
 
     return *patient;
 }
@@ -38,6 +40,7 @@ Patient SetPatient(Patient *patient) {
 Measurement SetMeasurement(Measurement *measurement) {
     SetSkinfold(&measurement->skinfolds);
     SetCircunference(&measurement->circunference);
+    return *measurement;
 }
 
 //SetSkinfold é armazena dados em uma struct dentro de paciente. (patietn-->measurement-->skinfold);
@@ -115,7 +118,7 @@ Circunference SetCircunference(Circunference *circunference) {
 }
 
 //Imprime todos os dados coletados do paciente, provavelmente não usarei a 'apresentação' final pro usuário assim, estou usando para testes;
-void PrintPatient(Patient patient){
+void PrintPatient(Patient patient) {
     printf("\n\n");
 
     printf("Nome: %s\n", patient.name);
@@ -123,7 +126,7 @@ void PrintPatient(Patient patient){
     printf("Idade: %d anos\n", patient.age);
     printf("Altura: %.2fm\n", patient.height);
     printf("Peso: %.2fkg\n", patient.weight);
-    printf("IMC: %.0fkg/m²", patient.BMI);
+    printf("IMC: %.0lfkg/m²", patient.BMI);
     ResponseBMI(patient.BMI);
     printf("\n");
     printf("Antebraço: %.2fmm\n", patient.measurement.skinfolds.forearm);
@@ -134,22 +137,23 @@ void PrintPatient(Patient patient){
     printf("Axiliar Media: %.2fmm\n", patient.measurement.skinfolds.axilla);
     printf("Abdominal: %.2fmm\n", patient.measurement.skinfolds.abdominal);
     printf("Suprailiaca: %.2fmm\n", patient.measurement.skinfolds.suprailiac);
-    printf("Coxa: %.2fmm", patient.measurement.skinfolds.thigh);
-    printf("Circunferencia cintura: %.2f\n", patient.measurement.circunference.circWaist);
-    printf("Circunferencia biceps: %.2f\n", patient.measurement.circunference.cirBiceps);
-    printf("Circunferencia torax: %.2f\n", patient.measurement.circunference.circChest);
-    printf("Circunferencia pescoço: %.2f\n", patient.measurement.circunference.circNeck);
-    printf("Circunferencia abdomen: %.2f\n", patient.measurement.circunference.cirAbdominal);
-    printf("Circunferencia quadril: %.2f\n", patient.measurement.circunference.circHip);
-    printf("Circunferencia coxa %.2f\n", patient.measurement.circunference.circThigh);
-    printf("Circunferencia antebraço: %.2f\n", patient.measurement.circunference.circForearm);
-    printf("Circunferencia panturrilha: %.2f\n", patient.measurement.circunference.circCalf);
-    printf("Densidade Corporal: %.2lf\n", patient.DC);
+    printf("Coxa: %.2fmm\n", patient.measurement.skinfolds.thigh);
+    printf("Circunferencia cintura: %.2fcm\n", patient.measurement.circunference.circWaist);
+    printf("Circunferencia biceps: %.2fcm\n", patient.measurement.circunference.cirBiceps);
+    printf("Circunferencia torax: %.2fcm\n", patient.measurement.circunference.circChest);
+    printf("Circunferencia pescoço: %.2fcm\n", patient.measurement.circunference.circNeck);
+    printf("Circunferencia abdomen: %.2fcm\n", patient.measurement.circunference.cirAbdominal);
+    printf("Circunferencia quadril: %.2fcm\n", patient.measurement.circunference.circHip);
+    printf("Circunferencia coxa %.2fcm\n", patient.measurement.circunference.circThigh);
+    printf("Circunferencia antebraço: %.2fcm\n", patient.measurement.circunference.circForearm);
+    printf("Circunferencia panturrilha: %.2fcm\n", patient.measurement.circunference.circCalf);
+    printf("Densidade Corporal: %.2lf\n", patient.BD);
+    printf("Percentual de gordura: %.1lf%%", patient.BF);
 }
 
 //Calcula o IMC do paciente, tanto para impressão, seleção de alguns indicadores e futuros cálculos;
-float CalculateBMI(float weight, float height) {
-    float BMI;
+double CalculateBMI(float weight, float height) {
+    double BMI;
     BMI = weight / (pow(height, 2));
 
     return BMI;
@@ -165,7 +169,7 @@ float MeasurementAverage() {
 }
 
 //Retorna pro usuário qual a indicação do seu IMC de acordo com uma tabela existente;
-void ResponseBMI(float BMI) {
+void ResponseBMI(double BMI) {
 
     if (BMI < 17) {
         printf(" (Magreza Leve)");
@@ -180,7 +184,7 @@ void ResponseBMI(float BMI) {
     } else if (BMI < 40) {
         printf(" (Obesidade grau II)");
     } else {
-        printf(" (Obesidade grauIII)");
+        printf(" (Obesidade grau III)");
     }
 }
 
@@ -189,7 +193,7 @@ void ResponseBMI(float BMI) {
 
 //Inicialmente o usuário escolherá a função através da função seguinte;
 
-int SelectMethod(){
+int SelectMethod() {
     int method;
 
     printf("\nSelecione o protocolo para estimar o percentual de gordura do paciente:\n"
@@ -201,48 +205,113 @@ int SelectMethod(){
     return method;
 }
 
-double CalculateBF(Patient *patient) {
+double CalculateBD(Patient *patient) {
     if (patient->method == 1) {
         if (patient->sex == 'M') {
-            patient->DC = MethodPollockMale3(patient->measurement.skinfolds.chest, patient->measurement.skinfolds.abdominal,
-                               patient->measurement.skinfolds.thigh, patient->age);
+            patient->BD = MethodPollockMale3(patient->measurement.skinfolds.chest,
+                                             patient->measurement.skinfolds.abdominal,
+                                             patient->measurement.skinfolds.thigh, patient->age);
         } else {
-            patient->DC = MethodPollockFemale3(patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.suprailiac,
-                                 patient->measurement.skinfolds.thigh, patient->age);
+            patient->BD = MethodPollockFemale3(patient->measurement.skinfolds.triceps,
+                                               patient->measurement.skinfolds.suprailiac,
+                                               patient->measurement.skinfolds.thigh, patient->age);
         }
-
-//    }else if(method == 2){
-//        if(){
-//
-//        }else
-//    }else{
-//        if(){
-//
-//        }else{
-//
-//        }
-//    }
+    } else if (patient->method == 2) {
+        if (patient->sex == 'M') {
+            patient->BD = MethodPollockMale4(patient->measurement.skinfolds.suprailiac,
+                                             patient->measurement.skinfolds.abdominal,
+                                             patient->measurement.skinfolds.triceps,
+                                             patient->measurement.skinfolds.thigh, patient->age);
+        } else
+            patient->BD = MethodPollockFemale4(patient->measurement.skinfolds.suprailiac, patient->measurement.skinfolds.abdominal,
+                               patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.thigh,
+                               patient->age);
+    } else {
+        if (patient->sex == 'M') {
+            patient->BD = MethodPollockMale7(patient->measurement.skinfolds.chest, patient->measurement.skinfolds.axilla,
+                                             patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.subscapular,
+                                             patient->measurement.skinfolds.abdominal, patient->measurement.skinfolds.suprailiac,
+                                             patient->measurement.skinfolds.thigh, patient->age);
+        } else {
+            patient->BD = MethodPollockFemale7(patient->measurement.skinfolds.chest, patient->measurement.skinfolds.axilla,
+                                               patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.subscapular,
+                                               patient->measurement.skinfolds.abdominal, patient->measurement.skinfolds.suprailiac,
+                                               patient->measurement.skinfolds.thigh, patient->age);
+        }
     }
+    return patient->BD;
 }
 
-double MethodPollockMale3(float chest, float abdominal, float thigh, int age){
-    double DC;
+double MethodPollockMale3(float chest, float abdominal, float thigh, int age) {
+    double BD;
     double sumSkinfolds;
 
     sumSkinfolds = chest + abdominal + thigh;
 
-    DC = 1.10938 - (0.0008267 * sumSkinfolds) + (0.0000016 * pow(sumSkinfolds,2)) - (0.0002574 * age);
+    BD = 1.10938 - (0.0008267 * sumSkinfolds) + (0.0000016 * pow(sumSkinfolds, 2)) - (0.0002574 * age);
 
-    return DC;
+    return BD;
 }
 
-double MethodPollockFemale3(float triceps, float suprailiac, float thigh, int age){
-    double DC;
+double MethodPollockFemale3(float triceps, float suprailiac, float thigh, int age) {
+    double BD;
     double sumSkinfolds;
 
     sumSkinfolds = triceps + suprailiac + thigh;
 
-    DC = 1.0994921 - (0.0009929 * sumSkinfolds) + (0.0000023 * pow(sumSkinfolds,2)) - (0.0001392 * age);
+    BD = 1.0994921 - (0.0009929 * sumSkinfolds) + (0.0000023 * pow(sumSkinfolds, 2)) - (0.0001392 * age);
 
-    return DC;
+    return BD;
+}
+
+double MethodPollockMale4(float suprailliac, float abdominal, float triceps, float thigh, int age) {
+    double BD;
+    double sumSkinfolds;
+
+    sumSkinfolds = suprailliac + abdominal + triceps + thigh;
+
+    BD = (0.29288 * sumSkinfolds) - (0.0005 * pow(sumSkinfolds, 2)) + (0.15845 * age) - 5.76377;
+
+    return BD;
+}
+
+double MethodPollockFemale4(float suprailliac, float abdominal, float triceps, float thigh, int age) {
+    double BD;
+    double sumSkinfolds;
+
+    sumSkinfolds = suprailliac + abdominal + triceps + thigh;
+
+    BD = (0.29669 * sumSkinfolds) - (0.00043 * pow(sumSkinfolds, 2)) + (0.02963 * age) + 1.4072;
+
+    return BD;
+}
+
+double MethodPollockMale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age){
+    double BD;
+    double sumSkinfolds;
+
+    sumSkinfolds = chest + axilla + triceps + subescapular + abdominal + suprailliac + thigh;
+
+    BD = 1.112 - (0.00043499 * sumSkinfolds) + (0.00000055 * pow(sumSkinfolds,2)) - (0.00028826 * age);
+
+    return BD;
+}
+
+double MethodPollockFemale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age) {
+    double BD;
+    double sumSkinfolds;
+
+    sumSkinfolds = chest + axilla + triceps + subescapular + abdominal + suprailliac + thigh;
+
+    BD = 1.097 - (0.00046971 * sumSkinfolds) + (0.00000056 * pow(sumSkinfolds,2)) - (0.00012828 * age);
+
+    return BD;
+}
+
+double CalculateBF(double BD){
+    double BF;
+
+    BF =  (( (4.95 / BD) - 4.5)) * 100;
+
+    return BF;
 }

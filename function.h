@@ -34,11 +34,11 @@ typedef struct {
     int age;                 //Idade;
     float height;            //Altura;
     float weight;            //Peso;
-    float BMI;               //IMC;
+    double BMI;               //IMC;
     char evaluator;          //Avaliador;
     Measurement measurement; //Medidas;
     int method;              //Metodo usado para calcular percentual de gordura, armazenado para numa proxima consulta usar o mesmo;
-    double DC;
+    double BD;
     double BF;
 } Patient;
 
@@ -52,11 +52,11 @@ Circunference SetCircunference(Circunference *circunference);
 
 void PrintPatient(Patient patient);
 
-float CalculateBMI(float weight, float height);
+double CalculateBMI(float weight, float height);
 
 float MeasurementAverage();
 
-void ResponseBMI(float BMI);
+void ResponseBMI(double BMI);
 
 double MethodPollockMale3(float chest, float abdominal, float thigh, int age);
 
@@ -64,4 +64,14 @@ double MethodPollockFemale3(float triceps, float suprailiac, float thigh, int ag
 
 int SelectMethod();
 
-double CalculateBF(Patient *patient);
+double CalculateBD(Patient *patient);
+
+double MethodPollockMale4(float suprailliac, float abdominal, float triceps, float thigh, int age);
+
+double MethodPollockFemale4(float suprailliac, float abdominal, float triceps, float thigh, int age);
+
+double MethodPollockMale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age);
+
+double MethodPollockFemale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age);
+
+double CalculateBF(double BD);
