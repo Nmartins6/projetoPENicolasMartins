@@ -115,7 +115,7 @@ Circunference SetCircunference(Circunference *circunference) {
 }
 
 //Imprime todos os dados coletados do paciente, provavelmente não usarei a 'apresentação' final pro usuário assim, estou usando para testes;
-void PrintPatient(Patient patient) {
+void PrintPatient(Patient patient){
     printf("\n\n");
 
     printf("Nome: %s\n", patient.name);
