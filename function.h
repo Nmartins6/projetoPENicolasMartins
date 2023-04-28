@@ -75,3 +75,15 @@ double MethodPollockMale7(float chest, float axilla, float triceps, float subesc
 double MethodPollockFemale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age);
 
 double CalculateBF(double BD);
+
+int ReadFile(char *File_name);
+
+void WriteFile(char *FileName);
+
+void AddPatient();
+
+void DeletePatient();
+
+void FindPatient();
+
+void MainMenu();

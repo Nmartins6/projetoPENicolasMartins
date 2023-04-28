@@ -5,6 +5,9 @@
 
 #include "function.h"
 
+Patient patients[100];
+int num_patients = 0;
+
 //SetPatient armazena alguns dados do paciente;
 Patient SetPatient(Patient *patient) {
     printf("Nome: ");
@@ -188,11 +191,6 @@ void ResponseBMI(double BMI) {
     }
 }
 
-//*As próximas funções são protocolos para obter densidade corporal e percentual de gordura dos pacientes, nem todos
-//os metodos serão usados nesse primeiro momento, ainda irei decidir sobre o fator de escolha de cada metodo;
-
-//Inicialmente o usuário escolherá a função através da função seguinte;
-
 int SelectMethod() {
     int method;
 
@@ -223,19 +221,27 @@ double CalculateBD(Patient *patient) {
                                              patient->measurement.skinfolds.triceps,
                                              patient->measurement.skinfolds.thigh, patient->age);
         } else
-            patient->BD = MethodPollockFemale4(patient->measurement.skinfolds.suprailiac, patient->measurement.skinfolds.abdominal,
-                               patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.thigh,
-                               patient->age);
+            patient->BD = MethodPollockFemale4(patient->measurement.skinfolds.suprailiac,
+                                               patient->measurement.skinfolds.abdominal,
+                                               patient->measurement.skinfolds.triceps,
+                                               patient->measurement.skinfolds.thigh,
+                                               patient->age);
     } else {
         if (patient->sex == 'M') {
-            patient->BD = MethodPollockMale7(patient->measurement.skinfolds.chest, patient->measurement.skinfolds.axilla,
-                                             patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.subscapular,
-                                             patient->measurement.skinfolds.abdominal, patient->measurement.skinfolds.suprailiac,
+            patient->BD = MethodPollockMale7(patient->measurement.skinfolds.chest,
+                                             patient->measurement.skinfolds.axilla,
+                                             patient->measurement.skinfolds.triceps,
+                                             patient->measurement.skinfolds.subscapular,
+                                             patient->measurement.skinfolds.abdominal,
+                                             patient->measurement.skinfolds.suprailiac,
                                              patient->measurement.skinfolds.thigh, patient->age);
         } else {
-            patient->BD = MethodPollockFemale7(patient->measurement.skinfolds.chest, patient->measurement.skinfolds.axilla,
-                                               patient->measurement.skinfolds.triceps, patient->measurement.skinfolds.subscapular,
-                                               patient->measurement.skinfolds.abdominal, patient->measurement.skinfolds.suprailiac,
+            patient->BD = MethodPollockFemale7(patient->measurement.skinfolds.chest,
+                                               patient->measurement.skinfolds.axilla,
+                                               patient->measurement.skinfolds.triceps,
+                                               patient->measurement.skinfolds.subscapular,
+                                               patient->measurement.skinfolds.abdominal,
+                                               patient->measurement.skinfolds.suprailiac,
                                                patient->measurement.skinfolds.thigh, patient->age);
         }
     }
@@ -286,32 +292,234 @@ double MethodPollockFemale4(float suprailliac, float abdominal, float triceps, f
     return BD;
 }
 
-double MethodPollockMale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age){
+double
+MethodPollockMale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac,
+                   float thigh, int age) {
     double BD;
     double sumSkinfolds;
 
     sumSkinfolds = chest + axilla + triceps + subescapular + abdominal + suprailliac + thigh;
 
-    BD = 1.112 - (0.00043499 * sumSkinfolds) + (0.00000055 * pow(sumSkinfolds,2)) - (0.00028826 * age);
+    BD = 1.112 - (0.00043499 * sumSkinfolds) + (0.00000055 * pow(sumSkinfolds, 2)) - (0.00028826 * age);
 
     return BD;
 }
 
-double MethodPollockFemale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac, float thigh, int age) {
+double
+MethodPollockFemale7(float chest, float axilla, float triceps, float subescapular, float abdominal, float suprailliac,
+                     float thigh, int age) {
     double BD;
     double sumSkinfolds;
 
     sumSkinfolds = chest + axilla + triceps + subescapular + abdominal + suprailliac + thigh;
 
-    BD = 1.097 - (0.00046971 * sumSkinfolds) + (0.00000056 * pow(sumSkinfolds,2)) - (0.00012828 * age);
+    BD = 1.097 - (0.00046971 * sumSkinfolds) + (0.00000056 * pow(sumSkinfolds, 2)) - (0.00012828 * age);
 
     return BD;
 }
 
-double CalculateBF(double BD){
+double CalculateBF(double BD) {
     double BF;
 
-    BF =  (( (4.95 / BD) - 4.5)) * 100;
+    BF = (((4.95 / BD) - 4.5)) * 100;
 
     return BF;
 }
+
+int ReadFile(char *File_name) {
+    FILE *file = fopen(File_name, "r");
+
+    if (file == NULL) {
+        return 0;
+    }
+
+    char header[500];
+    fscanf(file, "%s\n", header);
+
+    // Lê cada linha do arquivo como um paciente
+    while (!feof(file)) {
+        fscanf(file, "%s\n", patients[num_patients].name);
+        num_patients++;
+    }
+
+    fclose(file);
+    return 1;
+}
+
+void WriteFile(char *FileName) {
+    FILE *file = fopen(FileName, "w");
+
+    if (file == NULL) {
+        printf("Falha ao abrir o arquivo \n");
+        return;
+    }
+
+    //Escreve o cabeçalho
+
+    fprintf(file,
+            "nome,sexo,idade,altura,peso,IMC,peitoral,axilar media,triceps,subescapular,abdominal,"
+            "suprailiaca,coxa,circunf pescoco,circunf cintura,circunf quadril \n");
+
+    int i;
+    for (i = 0; i < num_patients; i++) {
+
+        fprintf(file, "%s,%c,%i,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f \n", patients[i].name,
+                patients[i].sex, patients[i].age,
+                patients[i].height, patients[i].weight, patients[i].BMI,
+                patients[i].measurement.skinfolds.chest, patients[i].measurement.skinfolds.axilla,
+                patients[i].measurement.skinfolds.triceps,
+                patients[i].measurement.skinfolds.subscapular,
+                patients[i].measurement.skinfolds.abdominal,
+                patients[i].measurement.skinfolds.suprailiac,
+                patients[i].measurement.skinfolds.thigh,
+                patients[i].measurement.circunference.circNeck,
+                patients[i].measurement.circunference.circWaist,
+                patients[i].measurement.circunference.circHip);
+    }
+
+    fclose(file);
+}
+
+void AddPatient() {
+    if (num_patients >= 100) {
+        printf("Limite de pacientes atingido\n");
+        return;
+    }
+
+    printf("Nome: ");
+    fgets(patients[num_patients].name, 50, stdin);
+    patients[num_patients].name[strcspn(patients[num_patients].name, "\n")] = 0;
+
+    printf("Sexo(M/F): ");
+    scanf("%c", &patients[num_patients].sex);
+
+    printf("Idade: ");
+    scanf("%d", &patients[num_patients].age);
+
+    printf("Altura: ");
+    scanf("%f", &patients[num_patients].height);
+
+    printf("Peso: ");
+    scanf("%f", &patients[num_patients].weight);
+
+    patients[num_patients].BMI = CalculateBMI(patients[num_patients].weight, patients[num_patients].height);
+
+    printf("Dobra peitoral: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.chest);
+
+    printf("Dobra axilar media: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.axilla);
+
+    printf("Dobra Tricipital: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.triceps);
+
+    printf("Dobra subescapular: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.subscapular);
+
+    printf("Dobra abdominal: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.abdominal);
+
+    printf("Dobra suprailiaca: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.suprailiac);
+
+    printf("Dobra Coxa: ");
+    scanf("%f", &patients[num_patients].measurement.skinfolds.thigh);
+
+    printf("Circunferencia do pescoço: ");
+    scanf("%f", &patients[num_patients].measurement.circunference.circNeck);
+
+    printf("Circunferencia da cintura: ");
+    scanf("%f", &patients[num_patients].measurement.circunference.circWaist);
+
+    printf("Circunferencia do quadril: ");
+    scanf("%f", &patients[num_patients].measurement.circunference.circHip);
+
+    num_patients++;
+
+    WriteFile("teste.csv");
+
+}
+
+void DeletePatient() {
+    char name[50];
+
+    printf("Nome do paciente a ser apagado: ");
+    scanf("%s", name);
+
+    for (int i = 0; i < num_patients; i++) {
+        if (strcmp(patients[i].name, name) == 0) {
+            // Desloca os pacientes posteriores uma posição para trás
+            for (int j = i; j < num_patients - 1; j++) {
+                patients[j] = patients[j + 1];
+            }
+
+            num_patients--;
+            WriteFile("teste.csv");
+            printf("Paciente apagado com sucesso!\n");
+            return;
+        }
+    }
+
+    printf("Paciente nao encontrado.\n");
+}
+
+void FindPatient() {
+    char name[50];
+
+    printf("Nome do paciente: ");
+    scanf("%s", name);
+
+    for (int i = 0; i < num_patients; i++) {
+        if (strcmp(patients[i].name, name) == 0) {
+            printf("Paciente encontrado:\n");
+            printf("Nome: %s\n", patients[i].name);
+
+            return;
+        }
+    }
+
+    printf("Paciente nao encontrado.\n");
+}
+
+void MainMenu(){
+
+    if (!ReadFile("teste.csv")) {
+        printf("Arquivo teste.csv nao encontrado.\n");
+    }
+
+    int opcao = 0;
+
+    while (opcao != 4) {
+        printf("\nMenu:\n");
+        printf("1 - Cadastrar um novo paciente\n");
+        printf("2 - Buscar um paciente pelo nome\n");
+        printf("3 - Apagar um paciente\n");
+        printf("4 - Sair\n");
+
+        printf("\nDigite uma opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                AddPatient();
+                break;
+            case 2:
+                FindPatient();
+                break;
+            case 3:
+                DeletePatient();
+                break;
+            case 4:
+                printf("Saindo do programa...\n");
+                break;
+            default:
+                printf("Opcao invalida.\n");
+                break;
+        }
+    }
+}
+
+
+
+
+
